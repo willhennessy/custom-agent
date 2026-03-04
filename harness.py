@@ -1,15 +1,22 @@
 from time import sleep
 from llm import call_model
 
-MAX_STEPS = 3
+MAX_STEPS = 5
 
 def run_agent(user_input):
+    context = [{
+        "role": "user",
+        "content": user_input
+    }]
     for step in range(MAX_STEPS):
-        response = call_model(user_input)
+        response = call_model(context)
+        sleep(1)
+
         if response["tool_call"]:
             print("calling tools")
         else:
+            # TODO: implement tool calls
+            # TODO: append tool result to context
             print("Agent: ", response["message"])
-        sleep(1)
 
     return "max steps reached"
