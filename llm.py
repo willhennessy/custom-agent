@@ -1,11 +1,19 @@
+from openai import OpenAI
 from time import time
 
 def call_model(messages):
+    client = OpenAI()
     start = time()
-    # TODO: implement Model API call
+    response = client.responses.create(
+        model="gpt-5-mini",
+        input=messages
+    )
     latency = time() - start
+
+    print(response)
+
     return {
-        "message": "test",
+        "message": response.output_text,
         "tool_call": None,
         "latency": latency
     }

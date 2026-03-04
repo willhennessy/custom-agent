@@ -17,6 +17,6 @@ def run_agent(user_input):
         else:
             # TODO: implement tool calls
             # TODO: append tool result to context
-            print("Agent: ", response["message"])
+            return response["message"]
 
     return "max steps reached"
