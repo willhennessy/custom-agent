@@ -12,11 +12,14 @@ def run_agent(user_input):
         response = call_model(context)
         sleep(1)
 
+        search_web("chicago weather")
+
         if response["tool_call"]:
             print("calling tools")
-        else:
             # TODO: implement tool calls
+            # search_web("query")
             # TODO: append tool result to context
+        else:
             return response["message"]
 
     return "max steps reached"

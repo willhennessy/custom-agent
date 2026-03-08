@@ -1,5 +1,5 @@
 ## Simple script to visualize the prompt pipeline
-## Input string -> Token string -> Token IDs -> Embedding matrix
+## Input string -> Token string -> Token IDs -> Embedding
 ## For visual reference, see https://platform.openai.com/tokenizer
 
 import tiktoken
