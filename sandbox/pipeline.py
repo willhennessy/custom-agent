@@ -26,6 +26,7 @@ response = client.embeddings.create(
     model="text-embedding-3-large",
     input=INPUT_TEXT
 )
+
 embedding = response.data[0].embedding
-print("\nEmbedding length:", len(embedding))
-print("Embedding:", response.data[0].embedding[:10], "...")
+print("\nEmbedding dimension: ", len(embedding))
+print("\nEmbedding: ", embedding[:10], "...")
