@@ -10,8 +10,6 @@ def call_model(messages):
     )
     latency = time() - start
 
-    print(response)
-
     return {
         "message": response.output_text,
         "tool_call": None,
