@@ -12,7 +12,7 @@ def run_agent(user_input):
         response = call_model(context)
         sleep(1)
 
-        search_web("chicago weather")
+        search_web("what is one news story from today?")
 
         if response["tool_call"]:
             print("calling tools")

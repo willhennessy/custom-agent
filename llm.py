@@ -1,11 +1,15 @@
 from openai import OpenAI
 from time import time
+from tools import web_search_tool
 
 def call_model(messages):
     client = OpenAI()
     start = time()
     response = client.responses.create(
         model="gpt-5-mini",
+        tools=[
+            web_search_tool
+        ],
         input=messages
     )
     latency = time() - start
@@ -15,7 +19,3 @@ def call_model(messages):
         "tool_call": None,
         "latency": latency
     }
-
-# Questions
-# why is messages plural? use case?
-# when a tool call is requested, what does OpenAI put in the message? who reads the message? ex) for web search tool call is the message the search query?
