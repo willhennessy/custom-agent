@@ -14,8 +14,14 @@ def call_model(messages):
     )
     latency = time() - start
 
+    tool_calls = []
+    for item in response.output:
+        if item.type == "function_call":
+            tool_calls.append(item)
+
     return {
+        "output": response.output,
         "message": response.output_text,
-        "tool_call": None,
+        "tool_call": tool_calls,
         "latency": latency
     }

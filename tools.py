@@ -22,5 +22,5 @@ web_search_tool = {
 # Web search tool
 def search_web(query):
     tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
-    response = tavily_client.search(query)
-    return response
+    results = tavily_client.search(query)
+    return results
