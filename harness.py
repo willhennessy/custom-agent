@@ -2,7 +2,7 @@ from llm import call_model
 from tools import search_web
 import json
 
-MAX_STEPS = 5
+MAX_STEPS = 2
 
 def run_agent(user_input):
     context = [{
@@ -10,6 +10,7 @@ def run_agent(user_input):
         "content": user_input
     }]
     for step in range(MAX_STEPS):
+        print("context:", step, " - ", context)
         response = call_model(context)
 
         context += response["output"]
@@ -19,9 +20,7 @@ def run_agent(user_input):
 
         print("calling tools")
         for tool_call in response["tool_call"]:
-            print("TYPE:", tool_call.type)
-            print(tool_call)
-            search_results = search_web("query")
+            search_results = search_web(tool_call.arguments)
             context.append({
                 "type": "function_call_output",
                 "call_id": tool_call.call_id,
@@ -29,6 +28,5 @@ def run_agent(user_input):
                     "search_results": search_results
                 })
             })
-            print("appended", tool_call.call_id)
 
     return "max steps reached"

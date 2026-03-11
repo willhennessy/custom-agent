@@ -10,7 +10,7 @@ web_search_tool = {
     "parameters": {
         "type": "object",
         "properties": {
-            "sign": {
+            "search_query": {
                 "type": "string",
                 "description": "the search query"
             },
