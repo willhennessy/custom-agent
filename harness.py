@@ -9,6 +9,7 @@ def run_agent(user_input):
         {
             "role": "system",
             "content":  """
+                You are a helpful AI assistant. Your job is to answer user input questions with pragmatic, warm, and helpful responses.
                 You may use the web search tool when needed, but prefer at most one search.
                 If search results already answer the user's question, do not call the tool again; provide the final answer.
             """
@@ -19,17 +20,13 @@ def run_agent(user_input):
         }
     ]
     for step in range(MAX_STEPS):
-        print("messages:", step, " - ", messages)
         response = call_model(messages)
 
         if not response["tool_calls"]:
             return response["message"]
 
         messages += response["output"]
-        print("calling tools")
         for tool_call in response["tool_calls"]:
-            print(tool_call.arguments)
-
             search_query = tool_call.arguments.get("search_query")
             search_results = search_web(search_query)
             messages.append({
