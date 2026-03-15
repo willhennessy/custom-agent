@@ -5,36 +5,37 @@ import json
 MAX_STEPS = 2
 
 def run_agent(user_input):
-    context = [{
+    messages = [
+        {
+            "role": "system",
+            "content":  """
+                You may use the web search tool when needed, but prefer at most one search.
+                If search results already answer the user's question, do not call the tool again; provide the final answer.
+            """
+        },
+        {
         "role": "user",
         "content": user_input
-    }]
+        }
+    ]
     for step in range(MAX_STEPS):
-        print("context:", step, " - ", context)
-        response = call_model(context)
-
-        context += response["output"]
+        print("messages:", step, " - ", messages)
+        response = call_model(messages)
 
         if not response["tool_calls"]:
             return response["message"]
 
+        messages += response["output"]
         print("calling tools")
         for tool_call in response["tool_calls"]:
             print(tool_call.arguments)
 
             search_query = tool_call.arguments.get("search_query")
             search_results = search_web(search_query)
-            print("args:", search_query)
-            context.append({
+            messages.append({
                 "type": "function_call_output",
                 "call_id": tool_call.call_id,
-                "output": json.dumps({
-                    "search_results": search_results
-                })
+                "output": json.dumps(search_results)
             })
-            # context.append({
-            #     "role": "system",
-            #     "content": "If previous search results already contain enough information to answer the user’s core question, do not call this tool again."
-            # })
 
     return "max steps reached"

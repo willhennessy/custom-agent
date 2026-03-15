@@ -22,7 +22,7 @@ web_search_tool = {
                 "description": "the searcy query"
             },
         },
-        "required": ["query"],
+        "required": ["search_query"],
     },
 }
 
