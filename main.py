@@ -1,5 +1,7 @@
-from harness import run_agent
+from harness import AgentSession
 import argparse
+
+MAX_STEPS = 2
 
 def main():
     parser = argparse.ArgumentParser()
@@ -8,12 +10,24 @@ def main():
         nargs="?",
         help="Run the agent with a query string.",
     )
-    args = parser.parse_args()
+    arg_input = parser.parse_args().query
 
-    user_input = args.query if args.query else input("> ")
+    agent = AgentSession(max_steps = MAX_STEPS)
 
-    response = run_agent(user_input)
-    print("Agent: ", response)
+    while True:
+        if arg_input is not None:
+            user_input = arg_input
+            arg_input = None
+        else:
+            user_input = input("> ").strip()
+
+        if user_input.lower() in {"exit", "quit"}:
+            break
+        if not user_input:
+            continue # skip empty turns
+
+        response = agent.reply(user_input)
+        print("Agent: ", response)
 
 if __name__ == "__main__":
     main()

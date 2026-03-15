@@ -2,37 +2,48 @@ from llm import call_model
 from tools import search_web
 import json
 
-MAX_STEPS = 2
+SYSTEM_PROMPT = """
+You are a helpful AI assistant. Your job is to answer user input questions with pragmatic, warm, and
+helpful responses.
+You may use the web search tool when needed, but prefer at most one search.
+If search results already answer the user's question, do not call the tool again; provide the final
+answer.
+"""
 
-def run_agent(user_input):
-    messages = [
-        {
-            "role": "system",
-            "content":  """
-                You are a helpful AI assistant. Your job is to answer user input questions with pragmatic, warm, and helpful responses.
-                You may use the web search tool when needed, but prefer at most one search.
-                If search results already answer the user's question, do not call the tool again; provide the final answer.
-            """
-        },
-        {
-        "role": "user",
-        "content": user_input
-        }
-    ]
-    for step in range(MAX_STEPS):
-        response = call_model(messages)
+class AgentSession:
+    def __init__(self, max_steps: int = 2):
+        self.max_steps = max_steps
+        self.messages = [
+            {"role": "system", "content": SYSTEM_PROMPT}
+        ]
 
-        if not response["tool_calls"]:
-            return response["message"]
+    def reply(self, user_input: str) -> str:
+        # 1) add user turn to session memory
+        self.messages.append({"role": "user", "content": user_input})
 
-        messages += response["output"]
-        for tool_call in response["tool_calls"]:
-            search_query = tool_call.arguments.get("search_query")
-            search_results = search_web(search_query)
-            messages.append({
-                "type": "function_call_output",
-                "call_id": tool_call.call_id,
-                "output": json.dumps(search_results)
-            })
+        # 2) run one agent turn with tool calls where requested
+        for step in range(self.max_steps):
+            response = call_model(self.messages)
 
-    return "max steps reached"
+            # no tool call requested -> return final response
+            if not response["tool_calls"]:
+                assistant_text = response["output_text"]
+                self.messages.append({"role": "assistant", "content": assistant_text})
+                return assistant_text
+
+            # tool calls requested -> append model output and tool output
+            self.messages += response["output"]
+            for tool_call in response["tool_calls"]:
+                if tool_call.name == "search_web":
+                    search_query = tool_call.arguments.get("search_query")
+                    search_results = search_web(search_query)
+                    self.messages.append({
+                        "type": "function_call_output",
+                        "call_id": tool_call.call_id,
+                        "output": json.dumps(search_results)
+                    })
+
+        # TODO: when max steps reached, summarize what we found
+        fallback = "max steps reached"
+        self.messages.append({"role": "assistant", "content": fallback})
+        return fallback

@@ -43,7 +43,7 @@ def call_model(messages):
 
     return {
         "output": response.output,
-        "message": response.output_text,
+        "output_text": response.output_text,
         "tool_calls": tool_calls,
         "latency": latency
     }
