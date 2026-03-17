@@ -1,7 +1,44 @@
 import os
+import ast
 from tavily import TavilyClient
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+
+ALLOWED_BINARY_OPS = {
+    ast.Add: lambda a, b: a + b,
+    ast.Sub: lambda a, b: a - b,
+    ast.Mult: lambda a, b: a * b,
+    ast.Div: lambda a, b: a / b,
+    ast.FloorDiv: lambda a, b: a // b,
+    ast.Mod: lambda a, b: a % b,
+    ast.Pow: lambda a, b: a ** b,
+}
+
+ALLOWED_UNARY_OPS = {
+    ast.UAdd: lambda a: +a,
+    ast.USub: lambda a: -a,
+}
+
+def _eval(node):
+    if isinstance(node, ast.Expression):
+        return _eval(node.body)
+
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return node.value
+
+    if isinstance(node, ast.BinOp):
+        op_type = type(node.op)
+        if op_type not in ALLOWED_BINARY_OPS:
+            raise ValueError(f"Unsupported operator: {op_type.__name__}")
+        return ALLOWED_BINARY_OPS[op_type](_eval(node.left), _eval(node.right))
+
+    if isinstance(node, ast.UnaryOp):
+        op_type = type(node.op)
+        if op_type not in ALLOWED_UNARY_OPS:
+            raise ValueError(f"Unsupported operator: {op_type.__name__}")
+        return ALLOWED_UNARY_OPS[op_type](_eval(node.operand))
+
+    raise ValueError(f"Unsupported expression: {type(node).__name__}")
 
 # Web search tool
 def search_web(query):
@@ -9,10 +46,14 @@ def search_web(query):
     results = tavily_client.search(query)
     return results
 
-# Calculator tool
+# Calculator tool: safely evaluate an arithmetic expression
 def calculate_expression(expression: str):
-    # TODO: evaluate expression
-    return 0
+    try:
+        parsed = ast.parse(expression, mode="eval")
+        print(parsed)
+        return _eval(parsed)
+    except SyntaxError as e:
+        raise ValueError("Invalid expression syntax") from e
 
 # Tool Schemas
 TOOL_SCHEMAS = [
@@ -40,7 +81,7 @@ TOOL_SCHEMAS = [
     },
     {
         "type": "function",
-        "name": "calculator",
+        "name": "calculate_expression",
         "description": "Evaluate a mathematical expression. Use this tool any time you need to compute arithmetic.",
         "parameters": {
             "type": "object",

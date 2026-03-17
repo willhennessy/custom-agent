@@ -1,5 +1,5 @@
 from llm import call_model
-from tools import search_web
+from tools import search_web, calculate_expression
 import json
 
 SYSTEM_PROMPT = """
@@ -41,6 +41,14 @@ class AgentSession:
                         "type": "function_call_output",
                         "call_id": tool_call.call_id,
                         "output": json.dumps(search_results)
+                    })
+                elif tool_call.name == "calculate_expression":
+                    expression = tool_call.arguments.get("expression")
+                    result = calculate_expression(expression)
+                    self.messages.append({
+                        "type": "function_call_output",
+                        "call_id": tool_call.call_id,
+                        "output": json.dumps(result)
                     })
 
         # TODO: when max steps reached, summarize what we found
