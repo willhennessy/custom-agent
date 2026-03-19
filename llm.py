@@ -27,6 +27,7 @@ def extract_tool_calls(output_items: list[ResponseOutputItem]) -> list[ToolCall]
             )
     return tool_calls
 
+# Call OpenAI Responses API
 def call_model(messages):
     client = OpenAI()
     start = time()
