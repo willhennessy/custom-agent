@@ -1,6 +1,7 @@
 import os
 import ast
 from tavily import TavilyClient
+from datetime import datetime
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
@@ -55,6 +56,9 @@ def calculate_expression(expression: str):
     except SyntaxError as e:
         raise ValueError("Invalid expression syntax") from e
 
+def get_current_time() -> str:
+    return datetime.now().isoformat()
+
 # Tool Schemas
 TOOL_SCHEMAS = [
     {
@@ -93,5 +97,12 @@ TOOL_SCHEMAS = [
             }
         },
         "required": ["expression"],
+    },
+    {
+        "type": "function",
+        "name": "get_current_time",
+        "description": "Get the current time in the user's local timezone.",
+        "parameters": {},
+        "required": [],
     }
 ]

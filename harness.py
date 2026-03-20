@@ -1,5 +1,5 @@
 from llm import call_model
-from tools import search_web, calculate_expression
+from tools import search_web, calculate_expression, get_current_time
 import json
 
 SYSTEM_PROMPT = """
@@ -49,6 +49,12 @@ class AgentSession:
                         "type": "function_call_output",
                         "call_id": tool_call.call_id,
                         "output": json.dumps(result)
+                    })
+                elif tool_call.name == "get_current_time":
+                    self.messages.append({
+                        "type": "function_call_output",
+                        "call_id": tool_call.call_id,
+                        "output": get_current_time()
                     })
 
         # TODO: when max steps reached, summarize what we found
